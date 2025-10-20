@@ -1,6 +1,7 @@
+#include  <stdio.h>
 #include  <math.h>
 
-#define PI ((double) 3.141592653589793238462643)
+#define PI ((float) 3.141592653589793238462643)
 
 float Clip (float n, float minValue, float maxValue)  
 {  
@@ -39,9 +40,9 @@ float PixelYToLat(int pixelY, int levelOfDetail)
 
 int main(void)
 {
-    int   lod = 14;
-    float lat_i =   84.987987;
-    float lon_i = -112.456456;
+    int   lod   = 12;
+    float lat_i =  -84.987987;
+    float lon_i =  178.456456;
     
     int x = LonToPixelX(lon_i, lod);
     int y = LatToPixelY(lat_i, lod);
@@ -55,6 +56,8 @@ int main(void)
     printf("y     = %08x \n", y);
     printf("lat f = %f \n", lat_f);
     printf("lon f = %f \n", lon_f);
+    printf("err x = %f \n", (lon_f - lon_i));
+    printf("err y = %f \n", (lat_f - lat_i));
     
     return 0;
 }
