@@ -1,54 +1,54 @@
 #include  <stdio.h>
 #include  <math.h>
 
-#define PI ((float) 3.141592653589793238462643)
+#define PI         ((float) 3.14159265359)
+#define PI_2       ((float) 6.28318530718)    /* 2 * pi */
+#define PI_180     ((float) 0.01745329251)    /* pi / 180 */
+#define PI_4       ((float) 0.07957747154)    /* 1/(pi * 4) */
+#define mapSize    (0x00100000)               /* 256 << levelOfDetail [12] */
 
-float Clip (float n, float minValue, float maxValue)  
-{  
-    return fmin(fmax(n, minValue), maxValue);  
+float Clip (float n, float minval, float maxval)  
+{
+    if (n < minval) return minval;
+    if (n > maxval) return maxval;
+    return n;
 }
 
-int LonToPixelX (float longitude, int levelOfDetail)  
+int LonToPixelX (float longitude)  
 {  
-    float x = (longitude + 180) / 360;   
-    unsigned int mapSize = (256 << levelOfDetail);  
+    float x = (longitude + 180.0) / 360.0;   
     return ((int) Clip(x * mapSize + 0.5, 0, mapSize - 1));  
 }
 
-int LatToPixelY (float latitude, int levelOfDetail)  
+int LatToPixelY (float latitude)  
 {  
-    float sinLatitude = sin(latitude * PI / 180);  
-    float y = 0.5 - log((1 + sinLatitude) / (1 - sinLatitude)) / (4 * PI);  
-    unsigned int mapSize = (256 << levelOfDetail);  
+    float s = sin(latitude * PI_180);  
+    float y = 0.5 - (PI_4 * log((1 + s) / (1 - s)));  
     return ((int) Clip(y * mapSize + 0.5, 0, mapSize - 1));  
 }
 
-float PixelXToLon(int pixelX, int levelOfDetail)  
+float PixelXToLon(int pixelX)  
 {  
-    float mapSize = (256 << levelOfDetail);  
     float x = (Clip(pixelX, 0, mapSize - 1) / mapSize) - 0.5;  
     return (360 * x);  
 }
 
-float PixelYToLat(int pixelY, int levelOfDetail)  
+float PixelYToLat(int pixelY)  
 {  
-    float mapSize = (256 << levelOfDetail);  
     float y = 0.5 - (Clip(pixelY, 0, mapSize - 1) / mapSize);  
-    return (90 - 360 * atan(exp(-y * 2 * PI)) / PI);  
+    return (90 - 360 * atan(exp(-y * PI_2)) / PI);  
 }
 
 
 int main(void)
 {
-    int   lod   = 12;
     float lat_i =  -84.987987;
     float lon_i =  178.456456;
     
-    int x = LonToPixelX(lon_i, lod);
-    int y = LatToPixelY(lat_i, lod);
-    
-    float lat_f = PixelYToLat(y, lod);
-    float lon_f = PixelXToLon(x, lod);
+    int x = LonToPixelX(lon_i);
+    int y = LatToPixelY(lat_i);
+    float lat_f = PixelYToLat(y);
+    float lon_f = PixelXToLon(x);
     
     printf("lat i = %f \n", lat_i);
     printf("lon i = %f \n", lon_i);
