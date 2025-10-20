@@ -31,17 +31,22 @@ algorithm makes use of a number of trigonometric and inverse functions. By use o
 combining constants in to "magic" numbers, I was able to considerably reduce the complexity of the algorithm such
 that it could be implemented on a small microcontroller with high efficiency and minimum effort.
 
-My encoding algorithm (in C-like pseudocode) is as follows:
+The Bing Maps algorithm is as follows:
 
 ````
-double a = 425983.999935
-double b = 67797.4592677
-double torad = 0.01745329252
-double xconv = 2366.57777742
-
-X = (longitude + 180) * xconv;
-S = sin(latitude * torad);
-Y = a – (b * log((1 + S) / (1 – S)));
+        public static void LatLongToPixelXY (double latitude, double longitude, int levelOfDetail, out int pixelX, out int pixelY)  
+        {  
+            latitude = Clip(latitude, MinLatitude, MaxLatitude);  
+            longitude = Clip(longitude, MinLongitude, MaxLongitude);  
+  
+            double x = (longitude + 180) / 360;   
+            double sinLatitude = Math.Sin(latitude * Math.PI / 180);  
+            double y = 0.5 - Math.Log((1 + sinLatitude) / (1 - sinLatitude)) / (4 * Math.PI);  
+  
+            uint mapSize = MapSize(levelOfDetail);  
+            pixelX = (int) Clip(x * mapSize + 0.5, 0, mapSize - 1);  
+            pixelY = (int) Clip(y * mapSize + 0.5, 0, mapSize - 1);  
+        }
 ````
 
 Note that there are only two functions (sine and base-ten logarithm) that are "difficult". Both can be found in
@@ -49,15 +54,15 @@ standard libraries. The outputs (X and Y) are unsigned long integers, but only t
 Decoding is only slightly more difficult:
 
 ````
-double xcon = 0.00042255108
-double twopi = 6.28318530718
-double bcon = 1.47498152704E-5
-double todeg = 57.2957795131
-
-longitude = (X * xcon) – 180.0;
-b = twopi – (Y * bcon);
-a = pow(10, b);
-latitude = todeg * (asin((a – 1)/(a + 1)));
+        public static void PixelXYToLatLong (int pixelX, int pixelY, int levelOfDetail, out double latitude, out double longitude)  
+        {  
+            double mapSize = MapSize(levelOfDetail);  
+            double x = (Clip(pixelX, 0, mapSize - 1) / mapSize) - 0.5;  
+            double y = 0.5 - (Clip(pixelY, 0, mapSize - 1) / mapSize);  
+  
+            latitude = 90 - 360 * Math.Atan(Math.Exp(-y * 2 * Math.PI)) / Math.PI;  
+            longitude = 360 * x;  
+        }
 ````
 
 As before, there are only two standard library functions needed (inverse sine and power). The inputs (X and Y) are
