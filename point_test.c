@@ -33,8 +33,8 @@ FTYPE PixelXToLon (int pixelX) {
 }
 
 FTYPE PixelYToLat (int pixelY) {  
-    FTYPE y = 0.5 - (Clip(pixelY, 0, mapSize - 1) / mapSize);  
-    return (90 - (PI_360 * atan(exp(y * PI_2))));
+    FTYPE y = PI_2 * (0.5 - (Clip(pixelY, 0, mapSize - 1) / mapSize));  
+    return (90 - (PI_360 * atan(exp(y))));
 }
 
 int main(void)
