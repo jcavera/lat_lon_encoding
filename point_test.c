@@ -1,22 +1,22 @@
 #include  <stdio.h>
 #include  <math.h>
 
-#define FTYPE      double
-
+#define FTYPE      double                        /* floating point data type */
 #define PI         ((FTYPE)   3.14159265359)
-#define PI_2       ((FTYPE)  -6.28318530718)  /* -2 * pi */
-#define PI_180     ((FTYPE)   0.01745329251)  /* pi / 180 */
-#define PI_360     ((FTYPE) 114.591559026)    /* 360 / pi */
-#define PI_4       ((FTYPE)   0.07957747154)  /* 1/(pi * 4) */
-#define mapSize    (0x00100000)               /* 256 << levelOfDetail [12] */
+#define PI_2       ((FTYPE)  -6.28318530718)     /* -2 * pi */
+#define PI_180     ((FTYPE)   0.01745329251)     /* pi / 180 */
+#define PI_360     ((FTYPE) 114.591559026)       /* 360 / pi */
+#define PI_4       ((FTYPE)   0.07957747154)     /* 1/(pi * 4) */
+#define MAP_SIZE   (0x00100000)                  /* 256 << levelOfDetail [12] */
 
-FTYPE Clip (FTYPE n, FTYPE minval, FTYPE maxval) {
+// Return a number clipped to the minimum and maximum value range.
+
+FTYPE clip_to_range (FTYPE n, FTYPE minval, FTYPE maxval) {
     if (n < minval) return minval;
     if (n > maxval) return maxval;
     return n;
 }
 
-// Chebyshev poly via https://stuffmatic.com/chebyshev/
 // Chebyshev poly approximation to (atan(exp(x))) in the range of -pi to pi:
 
 #define NUM_COEFFS 32
@@ -40,7 +40,7 @@ FTYPE coeffs_log_s[NUM_COEFFS] = {     -2.220446049250313e-16,    5.042450681824
                                        -1.609823385706477e-15,    0.000150829709385375,      1.2073675392798577e-15,     0.00007378672377310325,
                                         1.5404344466674047e-15,   0.00003347413001082711,   -4.718447854656915e-16,      0.000009598620639480332  };
 
-FTYPE chebyshev (const FTYPE* coeffs, int num_coeffs, FTYPE x, FTYPE x_min, FTYPE x_max) {
+FTYPE chebyshev_approx (const FTYPE* coeffs, int num_coeffs, FTYPE x, FTYPE x_min, FTYPE x_max) {
     FTYPE x_rel_2  = -2.0 + (4.0 * (x - x_min) / (x_max - x_min));
     FTYPE d        = 0.0;
     FTYPE dd       = 0.0;
@@ -53,30 +53,26 @@ FTYPE chebyshev (const FTYPE* coeffs, int num_coeffs, FTYPE x, FTYPE x_min, FTYP
     return ((0.5 * x_rel_2 * d) - dd + (0.5 * coeffs[0]));
 }
 
-
-int LonToPixelX (FTYPE longitude) {  
+int encode_lon_to_x (FTYPE longitude) {  
     FTYPE x = (longitude + 180.0) / 360.0;   
-    return ((int) Clip(x * mapSize + 0.5, 0, mapSize - 1));  
+    return ((int) clip_to_range(x * MAP_SIZE + 0.5, 0, MAP_SIZE - 1));  
 }
 
-int LatToPixelY (FTYPE latitude) {  
-//  FTYPE s = sin(latitude * PI_180);  
-//  FTYPE y = 0.5 - (PI_4 * log((1 + s) / (1 - s)));
+int encode_lat_to_y (FTYPE latitude) {  
     FTYPE a = latitude * PI_180;
-    FTYPE b = chebyshev(coeffs_log_s, NUM_COEFFS, a, -1.5, 1.5);
+    FTYPE b = chebyshev_approx(coeffs_log_s, NUM_COEFFS, a, -1.5, 1.5);
     FTYPE y = 0.5 - (PI_4 * b);
-    return ((int) Clip(y * mapSize + 0.5, 0, mapSize - 1));  
+    return ((int) clip_to_range(y * MAP_SIZE + 0.5, 0, MAP_SIZE - 1));  
 }
 
-FTYPE PixelXToLon (int pixelX) {  
-    FTYPE x = (Clip(pixelX, 0, mapSize - 1) / mapSize) - 0.5;  
+FTYPE decode_x_to_lon (int pixelX) {  
+    FTYPE x = (clip_to_range(pixelX, 0, MAP_SIZE - 1) / MAP_SIZE) - 0.5;  
     return (360 * x);  
 }
 
-FTYPE PixelYToLat (int pixelY) {  
-    FTYPE y = PI_2 * (0.5 - (Clip(pixelY, 0, mapSize - 1) / mapSize));  
-//  return (90 - (PI_360 * atan(exp(y))));
-    FTYPE a = chebyshev(coeffs_atan_e, NUM_COEFFS, y, -3.2, 3.2);
+FTYPE decode_y_to_lat (int pixelY) {  
+    FTYPE y = PI_2 * (0.5 - (clip_to_range(pixelY, 0, MAP_SIZE - 1) / MAP_SIZE));  
+    FTYPE a = chebyshev_approx(coeffs_atan_e, NUM_COEFFS, y, -3.2, 3.2);
     return (90 - (PI_360 * a));
 }
 
@@ -84,11 +80,10 @@ int main(void)
 {
     FTYPE lat_i =  -84.987987;
     FTYPE lon_i =  178.456456;
-    
-    int x = LonToPixelX(lon_i);
-    int y = LatToPixelY(lat_i);
-    FTYPE lat_f = PixelYToLat(y);
-    FTYPE lon_f = PixelXToLon(x);
+    int   y     = encode_lat_to_y(lat_i);
+    int   x     = encode_lon_to_x(lon_i);
+    FTYPE lat_f = decode_y_to_lat(y);
+    FTYPE lon_f = decode_x_to_lon(x);
     
     printf("lat i = %f \n", lat_i);
     printf("lon i = %f \n", lon_i);
