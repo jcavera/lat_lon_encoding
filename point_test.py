@@ -1,3 +1,5 @@
+import numpy as np
+
 PI       = (  3.14159265359)
 PI_2     = ( -6.28318530718)     ## -2 * pi
 PI_180   = (  0.01745329251)     ## pi / 180
@@ -9,6 +11,16 @@ def clip_to_range (n, minval, maxval):
     if (n < minval): return minval
     if (n > maxval): return maxval
     return n
+
+## haversine distance formula for computing the error in distance between the initial and final points
+def distance(s_lat, s_lng, e_lat, e_lng):
+   R = 6373.0  ## approximate radius of earth in km
+   s_lat = s_lat * PI_180
+   s_lng = s_lng * PI_180
+   e_lat = e_lat * PI_180
+   e_lng = e_lng * PI_180
+   d = np.sin((e_lat - s_lat)/2)**2 + np.cos(s_lat)*np.cos(e_lat) * np.sin((e_lng - s_lng)/2)**2
+   return (2 * R * np.arcsin(np.sqrt(d)))
 
 NUM_COEFFS    = 32
 coeffs_atan_e = [  1.5707963267948966,       0.8616499258747404,        3.9898639947466563e-17,    -0.14560225678982303,      \
@@ -42,11 +54,9 @@ def chebyshev_approx (coeffs, num_coeffs, x, x_min, x_max):
         i -= 1
     return ((0.5 * x_rel_2 * d) - dd + (0.5 * coeffs[0]))
 
-
 def encode_lon_to_x (longitude):  
     x = (longitude + 180.0) / 360.0
     return int(clip_to_range(x * MAP_SIZE + 0.5, 0, MAP_SIZE - 1))
-
 
 def encode_lat_to_y (latitude):
     a = latitude * PI_180
@@ -58,12 +68,25 @@ def decode_x_to_lon (pixelX):
     x = (clip_to_range(pixelX, 0, MAP_SIZE - 1) / MAP_SIZE) - 0.5
     return (360 * x)
 
-
 def decode_y_to_lat (pixelY):
     y = PI_2 * (0.5 - (clip_to_range(pixelY, 0, MAP_SIZE - 1) / MAP_SIZE))
     a = chebyshev_approx(coeffs_atan_e, NUM_COEFFS, y, -3.2, 3.2)
     return (90 - (PI_360 * a))
 
+def find_max_distance_error ():
+    dist_err  = 0.00
+    for lon_i in np.arange(-179.9, 179.8, 0.1):
+    print ("lon = " + "{:.2f}".format(lon_i) + "     ", end='\r')
+    for lat_i in np.arange(-84.9, 84.8, 0.1):
+        y     = encode_lat_to_y(lat_i)
+        x     = encode_lon_to_x(lon_i)
+        lat_f = decode_y_to_lat(y)
+        lon_f = decode_x_to_lon(x)
+        dist  = 1000 * distance(lat_i, lon_i, lat_f, lon_f)
+        if (dist > dist_err):
+            dist_err = dist
+    print ("\nmax dist err = ", dist_err)  ## should be approx. 27m
+    
 
 lat_i =  -84.987987
 lon_i =  178.456456
@@ -71,10 +94,13 @@ y     = encode_lat_to_y(lat_i)
 x     = encode_lon_to_x(lon_i)
 lat_f = decode_y_to_lat(y)
 lon_f = decode_x_to_lon(x)
-    
+dist  = 1000 * distance(lat_i, lon_i, lat_f, lon_f)
+
 print("lat i = ", "{:.7f}".format(lat_i))
 print("lon i = ", "{:.7f}".format(lon_i))
-print("x     = ", '{:02x}'.format(x))
-print("y     = ", '{:02x}'.format(y))
+print("x     = ", '{:08x}'.format(x))
+print("y     = ", '{:08x}'.format(y))
 print("lat f = ", "{:.7f}".format(lat_f), " err y = ", "{:.7f}".format(lat_f - lat_i))
 print("lon f = ", "{:.7f}".format(lon_f), " err x = ", "{:.7f}".format(lon_f - lon_i))
+print("dist  = ", "{:.2f}".format(dist), "m")
+
