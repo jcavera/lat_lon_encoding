@@ -1,5 +1,4 @@
 #include  <stdio.h>
-#include  <math.h>
 
 #define FTYPE      double                        /* floating point data type */
 #define PI         ((FTYPE)   3.14159265359)
