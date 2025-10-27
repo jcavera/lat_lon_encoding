@@ -1,4 +1,5 @@
-#include  <stdio.h>
+#include <stdio.h>
+#include <math.h>
 
 #define FTYPE      double                        /* floating point data type */
 #define PI         ((FTYPE)   3.14159265359)
@@ -23,10 +24,10 @@ FTYPE distance (FTYPE s_lat, FTYPE s_lng, FTYPE e_lat, FTYPE e_lng) {
     s_lng = s_lng * PI_180;
     e_lat = e_lat * PI_180;
     e_lng = e_lng * PI_180;
-    a = sin((e_lat - s_lat)/2);
-    b = sin((e_lng - s_lng)/2);
-    d = (a * a) + (cos(s_lat) * cos(e_lat) * b * b);
-    return (2 * R * arcsin(sqrt(d)));
+    FTYPE a = sin((e_lat - s_lat)/2);
+    FTYPE b = sin((e_lng - s_lng)/2);
+    FTYPE d = (a * a) + (cos(s_lat) * cos(e_lat) * b * b);
+    return (2 * R * asin(sqrt(d)));
 }
 
 // Chebyshev poly approximation to (atan(exp(x))) in the range of -pi to pi:
@@ -105,7 +106,7 @@ void test_single_point (FTYPE lat_i, FTYPE lon_i) {
 FTYPE find_max_distance_error (void) {
     FTYPE dist_err  = 0.00;
     FTYPE lon_i     = -179.9;
-    FTYPE x, y, lat_f, lon_f, d;
+    FTYPE x, y, lat_f, lon_f, dist;
     while (lon_i <= 179.9) {
         FTYPE lat_i = -84.9;
         while (lat_i <= 84.9) {
@@ -119,7 +120,7 @@ FTYPE find_max_distance_error (void) {
         }
         lon_i += 0.1;
     }
-    printf("max dist err = %f \n", dist_err);
+    printf("max dist err = %f \n", dist_err);    // should be approx. = 27.0
 }
 
 
