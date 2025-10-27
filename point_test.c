@@ -105,23 +105,21 @@ void test_single_point (FTYPE lat_i, FTYPE lon_i) {
 FTYPE find_max_distance_error (void) {
     FTYPE dist_err  = 0.00;
     FTYPE lon_i     = -179.9;
-    FTYPE lat_i     = -84.9;
+    FTYPE x, y, lat_f, lon_f, d;
     while (lon_i <= 179.9) {
-
+        FTYPE lat_i = -84.9;
+        while (lat_i <= 84.9) {
+            y     = encode_lat_to_y(lat_i);
+            x     = encode_lon_to_x(lon_i);
+            lat_f = decode_y_to_lat(y);
+            lon_f = decode_x_to_lon(x);
+            dist  = 1000.0 * distance(lat_i, lon_i, lat_f, lon_f);
+            if (dist > dist_err) dist_err = dist;
+            lat_i += 0.1;
+        }
         lon_i += 0.1;
     }
-
-    
-    for lon_i in np.arange(-179.9, 179.8, 0.1):
-        print ("lon = " + "{:.2f}".format(lon_i) + "     ", end='\r')
-        for lat_i in np.arange(-84.9, 84.8, 0.1):
-            y     = encode_lat_to_y(lat_i)
-            x     = encode_lon_to_x(lon_i)
-            lat_f = decode_y_to_lat(y)
-            lon_f = decode_x_to_lon(x)
-            dist  = 1000 * distance(lat_i, lon_i, lat_f, lon_f)
-            if (dist > dist_err):
-                dist_err = dist
+    printf("max dist err = %f \n", dist_err);
 }
 
 
