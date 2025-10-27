@@ -16,6 +16,19 @@ FTYPE clip_to_range (FTYPE n, FTYPE minval, FTYPE maxval) {
     return n;
 }
 
+// haversine distance formula for computing the error in distance between the initial and final points in km
+FTYPE distance (FTYPE s_lat, FTYPE s_lng, FTYPE e_lat, FTYPE e_lng) {
+    FTYPE R = 6373.0;        // approximate radius of earth in km
+    s_lat = s_lat * PI_180;  // convert all to radians
+    s_lng = s_lng * PI_180;
+    e_lat = e_lat * PI_180;
+    e_lng = e_lng * PI_180;
+    a = sin((e_lat - s_lat)/2);
+    b = sin((e_lng - s_lng)/2);
+    d = (a * a) + (cos(s_lat) * cos(e_lat) * b * b);
+    return (2 * R * arcsin(sqrt(d)));
+}
+
 // Chebyshev poly approximation to (atan(exp(x))) in the range of -pi to pi:
 
 #define NUM_COEFFS 32
@@ -75,10 +88,7 @@ FTYPE decode_y_to_lat (int pixelY) {
     return (90 - (PI_360 * a));
 }
 
-int main(void)
-{
-    FTYPE lat_i =  -84.987987;
-    FTYPE lon_i =  178.456456;
+void test_single_point (FTYPE lat_i, FTYPE lon_i) {
     int   y     = encode_lat_to_y(lat_i);
     int   x     = encode_lon_to_x(lon_i);
     FTYPE lat_f = decode_y_to_lat(y);
@@ -90,5 +100,32 @@ int main(void)
     printf("y     = %08x \n", y);
     printf("lat f = %f [ err y = %f ]\n", lat_f, (lat_f - lat_i));
     printf("lon f = %f [ err x = %f ]\n", lon_f, (lon_f - lon_i));
+}
+
+FTYPE find_max_distance_error (void) {
+    FTYPE dist_err  = 0.00;
+    FTYPE lon_i     = -179.9;
+    FTYPE lat_i     = -84.9;
+    while (lon_i <= 179.9) {
+
+        lon_i += 0.1;
+    }
+
+    
+    for lon_i in np.arange(-179.9, 179.8, 0.1):
+        print ("lon = " + "{:.2f}".format(lon_i) + "     ", end='\r')
+        for lat_i in np.arange(-84.9, 84.8, 0.1):
+            y     = encode_lat_to_y(lat_i)
+            x     = encode_lon_to_x(lon_i)
+            lat_f = decode_y_to_lat(y)
+            lon_f = decode_x_to_lon(x)
+            dist  = 1000 * distance(lat_i, lon_i, lat_f, lon_f)
+            if (dist > dist_err):
+                dist_err = dist
+}
+
+
+int main (void) {
+    test_single_point(-84.987987, 178.456456);
     return 0;
 }
