@@ -12,8 +12,8 @@ def clip_to_range (n, minval, maxval):
     if (n > maxval): return maxval
     return n
 
-## haversine distance formula for computing the error in distance between the initial and final points
-def distance(s_lat, s_lng, e_lat, e_lng):
+## haversine distance formula for computing the error in distance between the initial and final points in km
+def distance (s_lat, s_lng, e_lat, e_lng):
    R = 6373.0  ## approximate radius of earth in km
    s_lat = s_lat * PI_180
    s_lng = s_lng * PI_180
@@ -76,31 +76,29 @@ def decode_y_to_lat (pixelY):
 def find_max_distance_error ():
     dist_err  = 0.00
     for lon_i in np.arange(-179.9, 179.8, 0.1):
-    print ("lon = " + "{:.2f}".format(lon_i) + "     ", end='\r')
-    for lat_i in np.arange(-84.9, 84.8, 0.1):
-        y     = encode_lat_to_y(lat_i)
-        x     = encode_lon_to_x(lon_i)
-        lat_f = decode_y_to_lat(y)
-        lon_f = decode_x_to_lon(x)
-        dist  = 1000 * distance(lat_i, lon_i, lat_f, lon_f)
-        if (dist > dist_err):
-            dist_err = dist
+        print ("lon = " + "{:.2f}".format(lon_i) + "     ", end='\r')
+        for lat_i in np.arange(-84.9, 84.8, 0.1):
+            y     = encode_lat_to_y(lat_i)
+            x     = encode_lon_to_x(lon_i)
+            lat_f = decode_y_to_lat(y)
+            lon_f = decode_x_to_lon(x)
+            dist  = 1000 * distance(lat_i, lon_i, lat_f, lon_f)
+            if (dist > dist_err):
+                dist_err = dist
     print ("\nmax dist err = ", dist_err)  ## should be approx. 27m
     
-
-lat_i =  -84.987987
-lon_i =  178.456456
-y     = encode_lat_to_y(lat_i)
-x     = encode_lon_to_x(lon_i)
-lat_f = decode_y_to_lat(y)
-lon_f = decode_x_to_lon(x)
-dist  = 1000 * distance(lat_i, lon_i, lat_f, lon_f)
-
-print("lat i = ", "{:.7f}".format(lat_i))
-print("lon i = ", "{:.7f}".format(lon_i))
-print("x     = ", '{:08x}'.format(x))
-print("y     = ", '{:08x}'.format(y))
-print("lat f = ", "{:.7f}".format(lat_f), " err y = ", "{:.7f}".format(lat_f - lat_i))
-print("lon f = ", "{:.7f}".format(lon_f), " err x = ", "{:.7f}".format(lon_f - lon_i))
-print("dist  = ", "{:.2f}".format(dist), "m")
+def test_one_point (lat_i = -84.987987, lon_i =  178.456456):
+    y     = encode_lat_to_y(lat_i)
+    x     = encode_lon_to_x(lon_i)
+    lat_f = decode_y_to_lat(y)
+    lon_f = decode_x_to_lon(x)
+    dist  = 1000 * distance(lat_i, lon_i, lat_f, lon_f)
+    
+    print("lat i = ", "{:.7f}".format(lat_i))
+    print("lon i = ", "{:.7f}".format(lon_i))
+    print("x     = ", '{:08x}'.format(x))
+    print("y     = ", '{:08x}'.format(y))
+    print("lat f = ", "{:.7f}".format(lat_f), " err y = ", "{:.7f}".format(lat_f - lat_i))
+    print("lon f = ", "{:.7f}".format(lon_f), " err x = ", "{:.7f}".format(lon_f - lon_i))
+    print("dist  = ", "{:.2f}".format(dist), "m")
 
