@@ -1,5 +1,5 @@
-#include <stdio.h>
-#include <math.h>
+#include <stdio.h>   // only used for the demo printf statements
+#include <math.h>    // only used for the haversine distance measuring algorithm
 
 #define FTYPE      double                        /* floating point data type */
 #define PI         ((FTYPE)   3.14159265359)
