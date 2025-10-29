@@ -90,29 +90,36 @@ FTYPE decode_y_to_lat (int pixelY) {
     return (90 - (PI_360 * a));
 }
 
-ITYPE combine_xy (int x, int y) {
-    return (((ITYPE) x) + (((ITYPE) y) << 20));
-}
+ITYPE combine_xy      (int x, int y) {  return (((ITYPE) x) + (((ITYPE) y) << 20));  }
+int   split_x_from_xy (ITYPE xy)     {  return ((int) (xy & 0x000fffff));            }
+int   split_y_from_xy (ITYPE xy)     {  return ((int) ((xy >> 20) & 0x000fffff));    }
 
 void test_single_point (FTYPE lat_i, FTYPE lon_i) {
     int   y     = encode_lat_to_y(lat_i);
     int   x     = encode_lon_to_x(lon_i);
-    FTYPE lat_f = decode_y_to_lat(y);
-    FTYPE lon_f = decode_x_to_lon(x);
     ITYPE xy    = combine_xy(x, y);
+    int   xf    = split_x_from_xy(xy);
+    int   yf    = split_y_from_xy(xy);
+    FTYPE lat_f = decode_y_to_lat(yf);
+    FTYPE lon_f = decode_x_to_lon(xf);
+    FTYPE dist  = 1000.0 * distance(lat_i, lon_i, lat_f, lon_f);
     
     printf("lat i = %f \n", lat_i);
     printf("lon i = %f \n", lon_i);
     printf("x     = %08x \n", x);
     printf("y     = %08x \n", y);
     printf("xy    = %llx \n", xy);
+    printf("xf    = %08x \n", xf);
+    printf("yf    = %08x \n", yf);
     printf("lat f = %f [ err y = %f ]\n", lat_f, (lat_f - lat_i));
     printf("lon f = %f [ err x = %f ]\n", lon_f, (lon_f - lon_i));
+    printf("dist  = %.3f meters \n", dist);
 }
 
 FTYPE find_max_distance_error (void) {
     FTYPE dist_err  = 0.00;
     FTYPE lon_i     = -179.9;
+    FTYPE increment = 0.01;
     FTYPE err_lat, err_lon;
     FTYPE x, y, lat_f, lon_f, dist;
     while (lon_i <= 179.9) {
@@ -129,8 +136,8 @@ FTYPE find_max_distance_error (void) {
                 dist_err = dist;
                 err_lat  = lat_i;
                 err_lon  = lon_i;
-            } lat_i += 0.01;
-        } lon_i += 0.01;
+            } lat_i += increment;
+        } lon_i += increment;
     }
     printf("\nmax dist err = %f \n", dist_err);
     printf("err lat = %f \n", err_lat);
