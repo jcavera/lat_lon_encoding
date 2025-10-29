@@ -124,7 +124,7 @@ FTYPE find_max_distance_error (void) {
     FTYPE x, y, lat_f, lon_f, dist;
     while (lon_i <= 179.9) {
         FTYPE lat_i = -84.9;
-        printf("\rlon = %f ", lon_i);
+        printf("\rlon = %.3f    ", lon_i);
         fflush(stdout);
         while (lat_i <= 84.9) {
             y     = encode_lat_to_y(lat_i);
@@ -139,9 +139,9 @@ FTYPE find_max_distance_error (void) {
             } lat_i += increment;
         } lon_i += increment;
     }
-    printf("\nmax dist err = %f \n", dist_err);
-    printf("err lat = %f \n", err_lat);
-    printf("err lon = %f \n", err_lon);
+    printf("\nmax dist err = %.3f meters \n", dist_err);
+    printf("max err lat  = %f \n", err_lat);
+    printf("max err lon  = %f \n", err_lon);
 }
 
 int main (void) {
