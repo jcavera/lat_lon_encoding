@@ -2,6 +2,7 @@
 #include <math.h>    // only used for the haversine distance measuring algorithm
 
 #define FTYPE      double                        /* floating point data type */
+#define ITYPE      unsigned long long            /* 64b unsigned integer type */
 #define PI         ((FTYPE)   3.14159265359)
 #define PI_2       ((FTYPE)  -6.28318530718)     /* -2 * pi */
 #define PI_180     ((FTYPE)   0.01745329251)     /* pi / 180 */
@@ -89,16 +90,22 @@ FTYPE decode_y_to_lat (int pixelY) {
     return (90 - (PI_360 * a));
 }
 
+ITYPE combine_xy (int x, int y) {
+    return (((ITYPE) x) + (((ITYPE) y) << 20));
+}
+
 void test_single_point (FTYPE lat_i, FTYPE lon_i) {
     int   y     = encode_lat_to_y(lat_i);
     int   x     = encode_lon_to_x(lon_i);
     FTYPE lat_f = decode_y_to_lat(y);
     FTYPE lon_f = decode_x_to_lon(x);
+    ITYPE xy    = combine_xy(x, y);
     
     printf("lat i = %f \n", lat_i);
     printf("lon i = %f \n", lon_i);
     printf("x     = %08x \n", x);
     printf("y     = %08x \n", y);
+    printf("xy    = %llx \n", xy);
     printf("lat f = %f [ err y = %f ]\n", lat_f, (lat_f - lat_i));
     printf("lon f = %f [ err x = %f ]\n", lon_f, (lon_f - lon_i));
 }
