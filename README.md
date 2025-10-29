@@ -62,7 +62,7 @@ with Chebyshev polynomial approximations of the difficult functions.  Two 32-ele
 "good enough" accuracy.
 
 Both the C and python test files contain a function called "find_max_distance_error".  This runs through the allowed
-space of possible latitude and longitude values in 0.1 degree increments in order to find the largest error based on
+space of possible latitude and longitude values in small increments in order to find the largest error based on
 the haversine distance from the initial point to the decoded point.  For both the C and python versions, the maximum
 positional error is approximately 27 meters.  If the C "FTYPE" data type is set to "float" rather than "double" that
-error goes to approximately 30 meters.
+error goes to approximately 31 meters.  Still shouting distance.  Which was the goal.
