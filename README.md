@@ -61,6 +61,8 @@ particularly in a constrained system.  I wanted to reduce this to grade-school m
 with Chebyshev polynomial approximations of the difficult functions.  Two 32-element arrays of coefficients gave me
 "good enough" accuracy.
 
+When compiled for an ESP32 microcontroller, the library (minus the test functions) compiles to approximately 1200 bytes.
+
 Both the C and python test files contain a function called "find_max_distance_error".  This runs through the allowed
 space of possible latitude and longitude values in small increments in order to find the largest error based on
 the haversine distance from the initial point to the decoded point.  For both the C and python versions, the maximum
