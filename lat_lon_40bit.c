@@ -1,7 +1,5 @@
 #include "lat_lon_40bit.h"
 
-#define FTYPE      double                        /* floating point data type */
-#define ITYPE      unsigned long long            /* 64b unsigned integer type */
 #define PI         ((FTYPE)   3.14159265359)
 #define PI_2       ((FTYPE)  -6.28318530718)     /* -2 * pi */
 #define PI_180     ((FTYPE)   0.01745329251)     /* pi / 180 */
