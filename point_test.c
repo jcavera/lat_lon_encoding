@@ -90,9 +90,13 @@ FTYPE decode_y_to_lat (int pixelY) {
     return (90 - (PI_360 * a));
 }
 
-ITYPE combine_xy      (int x, int y) {  return (((ITYPE) x) + (((ITYPE) y) << 20));  }
-int   split_x_from_xy (ITYPE xy)     {  return ((int) (xy & 0x000fffff));            }
-int   split_y_from_xy (ITYPE xy)     {  return ((int) ((xy >> 20) & 0x000fffff));    }
+ITYPE combine_xy       (int x, int y)         {  return (((ITYPE) x) + (((ITYPE) y) << 20));  }
+int   split_x_from_xy  (ITYPE xy)             {  return ((int) (xy & 0x000fffff));            }
+int   split_y_from_xy  (ITYPE xy)             {  return ((int) ((xy >> 20) & 0x000fffff));    }
+
+ITYPE encode_to_xy     (FTYPE lat, FTYPE lon) {  return (combine_xy(encode_lon_to_x(lon), encode_lat_to_y(lat)));  }
+FTYPE decode_xy_to_lat (ITYPE xy)             {  return (decode_y_to_lat(split_y_from_xy(xy)));  }
+FTYPE decode_xy_to_lon (ITYPE xy)             {  return (decode_x_to_lon(split_x_from_xy(xy)));  }
 
 void test_single_point (FTYPE lat_i, FTYPE lon_i) {
     int   y     = encode_lat_to_y(lat_i);
