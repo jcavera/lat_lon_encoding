@@ -1,3 +1,6 @@
+#ifndef LAT_LON_40B_H
+#define LAT_LON_40B_H
+
 #define LL40_FTYPE  double               /* floating point data type - platform specific */
 #define LL40_ITYPE  unsigned long long   /* 64b unsigned integer type - platform specific */
 
@@ -13,3 +16,5 @@ int        split_y_from_xy  (LL40_ITYPE xy);              // split the 20-bit y 
 LL40_ITYPE encode_to_xy     (LL40_FTYPE lat, FTYPE lon);  // encode floating point latitude and longitude to a 40-bit integer
 LL40_FTYPE decode_xy_to_lat (LL40_ITYPE xy);              // fetch the floating point latitude from the combined 40-bit (xy) integer
 LL40_FTYPE decode_xy_to_lon (LL40_ITYPE xy);              // fetch the floating point longitude from the combined 40-bit (xy) integer
+
+#endif
